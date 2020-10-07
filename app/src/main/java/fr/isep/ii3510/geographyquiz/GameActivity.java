@@ -2,7 +2,9 @@ package fr.isep.ii3510.geographyquiz;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -10,14 +12,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
-public class MainActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity {
     private TextView countryTextView;
     private ListView capitalListView;
 
@@ -27,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_game);
 
         // 1. We first bind the widgets to Java objects
         countryTextView = findViewById(R.id.country_textView);
@@ -42,9 +43,19 @@ public class MainActivity extends AppCompatActivity {
                 TextView capitalCity = (TextView) view;
                 // Note the use of `Toast` to write messages to the user
                 if (capitalCity.getText().toString().equals(quizCountry.getCapitalCityName())) {
-                    Toast.makeText(MainActivity.this, "Your Geography ROX", Toast.LENGTH_SHORT).show();
+                    SharedPreferences prefs = getSharedPreferences("leaderboard", MODE_PRIVATE);
+                    int currentScore = prefs.getInt(quizCountry.getCountryName(), 0);
+                    currentScore++;
+
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putInt(quizCountry.getCountryName(), currentScore);
+                    editor.apply();
+
+                    Log.i("Current answer", quizCountry.getCountryName() + ": " + currentScore);
+
+                    Toast.makeText(GameActivity.this, "Your Geography ROX", Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(MainActivity.this, "Go back to school", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(GameActivity.this, "Go back to school", Toast.LENGTH_SHORT).show();
                 }
                 // After an item is clicked, we redo the whole process of picking countries and updating the display
                 List<Country> pickedCountries = pickRandomCountries();
